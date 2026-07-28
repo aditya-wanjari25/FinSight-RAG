@@ -2,71 +2,28 @@
 
 A production-grade **Multi-Agent RAG system** for financial document analysis, built on SEC 10-K filings and deployed on AWS.
 
-## Architecture
-```
-PDF Documents (SEC 10-K/10-Q)
-        ↓
-┌───────────────────┐
-│  Ingestion        │  PyMuPDF + pdfplumber → hierarchical chunking → OpenAI embeddings
-│  Pipeline         │
-└────────┬──────────┘
-         ↓
-┌─────────────────────────────────────┐
-│  Storage Layer                      │
-│  AWS S3 (documents)                 │
-│  AWS OpenSearch (vectors + BM25)    │
-└────────┬────────────────────────────┘
-         ↓
-┌─────────────────────────────────────────────────────┐
-│  Multi-Agent System (LangGraph)                     │
-│                                                     │
-│  SupervisorAgent  ─── classify → guardrail → route  │
-│       ├── RetrievalAgent     retrieve → generate    │
-│       ├── ComparisonAgent    retrieve → generate    │
-│       ├── CalculationAgent   retrieve → generate    │
-│       ├── SummarizationAgent retrieve → generate    │
-│       └── CrossCompanyAgent  retrieve → generate    │
-└────────┬────────────────────────────────────────────┘
-         ↓
-┌───────────────────┐
-│  FastAPI          │  REST API with Pydantic validation + Swagger UI
-└────────┬──────────┘
-         ↓
-┌───────────────────┐
-│  AWS ECS Fargate  │  Containerized deployment with auto-restart
-└───────────────────┘
-```
+## Agentic Architecture
 
-## Features
+<img width="747" height="640" alt="image" src="https://github.com/user-attachments/assets/133f058e-4dbc-498c-8815-640e4deff3a3" />
 
-- **Finance-aware PDF parsing** — extracts tables, section headers, and narrative text from complex 10-K filings using PyMuPDF + pdfplumber
-- **Hierarchical chunking** — preserves table integrity, respects SEC section boundaries, filters table-of-contents noise
-- **Hybrid retrieval** — BM25 (keyword) + vector (semantic) search combined with Reciprocal Rank Fusion; improves recall on exact financial figures, section names, and ticker symbols
-- **Metadata-filtered retrieval** — every chunk tagged with ticker, year, section, page — enables precise company/year-specific search
-- **Multi-agent reasoning** — supervisor LangGraph agent classifies queries and routes to five independent specialist agents, each with their own retrieve → generate pipeline
-- **Guardrail node** — validates every query before routing; blocks off-topic questions and unrecognised ticker/year combinations with a clean user-facing message
-- **Five query types** — retrieval, cross-period comparison, financial ratio calculation, section summarization, cross-company comparison
-- **Cross-company comparison** — compare any two ingested companies in a single query e.g. "Compare Apple and Google's risk factors"
+**Supervisor Agent**: Classifies queries and routes to five independent specialist agents, each with their own retrieve → generate pipeline
+**Guardrails**: Validates query before routing; blocks off-topic questions and unrecognised ticker/year combinations with a clean user-facing message
+**Retrieval Agent**: BM25 (keyword) + vector (semantic) search combined with Reciprocal Rank Fusion
+**Calculation Agent**: For financial ratio calculation queries with predefined formulae
+**Comparison Agent**: Handles cross-period comparison queries
+**Summarization Agent**: Full section summarization queries (chunks ranked by page)
+
+## Ingestion Pipeline
+<img width="785" height="538" alt="image" src="https://github.com/user-attachments/assets/ddcefd98-a4ce-4d72-afbb-08a2371dc8ce" />
+
+
+
+## Additional Features
+
 - **Structured answers** — every response includes citations with section and page number
 - **RAGAS evaluation** — quantitative quality scoring with faithfulness, relevancy, precision and recall
 - **LangSmith Tracing** — end-to-end observability with per-specialist subgraph traces, enabling node-level debugging of retrieval vs generation issues in production
 - **Production AWS deployment** — ECS Fargate + OpenSearch + S3 + Secrets Manager
-
-## Tech Stack
-
-| Layer | Local | Production (AWS) |
-|---|---|---|
-| LLM | OpenAI GPT-4o | OpenAI GPT-4o |
-| Orchestration | LangGraph | LangGraph |
-| Vector Store | ChromaDB | AWS OpenSearch |
-| Document Storage | Local filesystem | AWS S3 |
-| Embeddings | text-embedding-3-small | text-embedding-3-small |
-| PDF Parsing | PyMuPDF + pdfplumber | PyMuPDF + pdfplumber |
-| Observability | LangSmith | LangSmith
-| API | FastAPI | FastAPI |
-| Container | Docker | AWS ECS Fargate |
-| Secrets | .env file | AWS Secrets Manager |
-| Evaluation | RAGAS | RAGAS |
 
 
 ## AWS Infrastructure
@@ -166,12 +123,3 @@ python -m evaluation.run_eval
 | Context Recall | 0.450 |
 
 *Evaluated on 10 financial Q&A pairs from AAPL 2025 10-K*
-
-
-## Roadmap
-
-- [ ] Application Load Balancer (stable DNS endpoint)
-- [ ] Query expansion for improved context recall
-- [ ] Hybrid BM25 + vector search in OpenSearch
-- [ ] Earnings call transcript ingestion
-- [ ] Lambda trigger on S3 upload for auto-ingestion
