@@ -6,12 +6,12 @@ A production-grade **Multi-Agent RAG system** for financial document analysis, b
 
 <img width="747" height="640" alt="image" src="https://github.com/user-attachments/assets/133f058e-4dbc-498c-8815-640e4deff3a3" />
 
-**Supervisor Agent**: Classifies queries and routes to five independent specialist agents, each with their own retrieve → generate pipeline
-**Guardrails**: Validates query before routing; blocks off-topic questions and unrecognised ticker/year combinations with a clean user-facing message
-**Retrieval Agent**: BM25 (keyword) + vector (semantic) search combined with Reciprocal Rank Fusion
-**Calculation Agent**: For financial ratio calculation queries with predefined formulae
-**Comparison Agent**: Handles cross-period comparison queries
-**Summarization Agent**: Full section summarization queries (chunks ranked by page)
+- **Supervisor Agent**: Classifies queries and routes to five independent specialist agents, each with their own retrieve → generate pipeline
+- **Guardrails**: Validates query before routing; blocks off-topic questions and unrecognised ticker/year combinations with a clean user-facing message
+- **Retrieval Agent**: BM25 (keyword) + vector (semantic) search merged with Reciprocal Rank Fusion.
+- **Calculation Agent**: For financial ratio calculation queries with predefined formulae
+- **Comparison Agent**: Handles cross-period comparison queries
+- **Summarization Agent**: Full section summarization queries (chunks ranked by page)
 
 ## Ingestion Pipeline
 <img width="785" height="538" alt="image" src="https://github.com/user-attachments/assets/ddcefd98-a4ce-4d72-afbb-08a2371dc8ce" />
