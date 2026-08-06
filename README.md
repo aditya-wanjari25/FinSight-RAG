@@ -21,6 +21,7 @@ A production-grade **Multi-Agent RAG system** for financial document analysis, b
 ## Additional Features
 
 - **Structured answers** — every response includes citations with section and page number
+- **Session Memory** - a read-before / write-after wrapper, reads formatted history in before the graph runs, then writes the new turn back after. 
 - **RAGAS evaluation** — quantitative quality scoring with faithfulness, relevancy, precision and recall
 - **LangSmith Tracing** — end-to-end observability with per-specialist subgraph traces, enabling node-level debugging of retrieval vs generation issues in production
 - **Production AWS deployment** — ECS Fargate + OpenSearch + S3 + Secrets Manager
