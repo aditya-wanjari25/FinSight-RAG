@@ -1,5 +1,6 @@
 # api/routes/query.py
 
+import uuid
 from fastapi import APIRouter, HTTPException
 from api.schemas import QueryRequest, QueryResponse, CitationResponse
 from agents.graph import run_query
@@ -18,13 +19,21 @@ async def query_agent(request: QueryRequest):
     3. Generate a structured answer with citations
 
     Requires the requested ticker/year document to be ingested first.
+
+    session_id groups this query with prior turns in ConversationMemory
+    (agents/memory.py). If the client didn't send one — e.g. the first
+    question in a new conversation — we mint one here and return it;
+    the client is expected to send that same value on follow-up questions.
     """
+    session_id = request.session_id or str(uuid.uuid4())
+
     try:
         result = run_query(
             query=request.query,
             ticker=request.ticker,
             year=request.year,
             quarter=request.quarter,
+            session_id=session_id,
         )
 
         # Handle case where agent couldn't find relevant chunks
@@ -48,6 +57,7 @@ async def query_agent(request: QueryRequest):
             ticker=request.ticker,
             year=request.year,
             chunks_retrieved=len(result.get("retrieved_chunks") or []),
+            session_id=session_id,
         )
 
     except HTTPException:

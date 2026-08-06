@@ -37,6 +37,16 @@ class QueryRequest(BaseModel):
         default=QuarterEnum.annual,
         description="Filing period"
     )
+    session_id: Optional[str] = Field(
+        default=None,
+        description=(
+            "Groups this query with prior turns for conversation memory. "
+            "Omit on the first question in a session — the server generates "
+            "one and returns it in the response; send that same value back "
+            "on follow-up questions to get session-scoped memory."
+        ),
+        example=None,
+    )
 
     class Config:
         # Allows the enum to serialize as its string value
@@ -59,6 +69,7 @@ class QueryResponse(BaseModel):
     ticker: str
     year: int
     chunks_retrieved: int
+    session_id: str  # always present — echo this back on the next request in the session
 
 
 class IngestRequest(BaseModel):

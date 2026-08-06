@@ -60,3 +60,20 @@ class Reranker:
             f"(scores: {top[0]['reranker_score']:.3f} to {top[-1]['reranker_score']:.3f})")
 
         return top
+
+
+# Shared singleton — every specialist that uses RetrieveTool would otherwise
+# construct its own Reranker() and load a separate copy of the ~22MB
+# cross-encoder model at startup (RetrievalAgent, ComparisonAgent,
+# CalculationAgent, and CrossCompanyAgent each create their own RetrieveTool
+# instance). Lazily loaded on first actual use, not at import time, so
+# importing this module doesn't pay the model-load cost if reranking is
+# never invoked in a given process (e.g. in tests).
+_shared_reranker: Reranker | None = None
+
+
+def get_reranker() -> Reranker:
+    global _shared_reranker
+    if _shared_reranker is None:
+        _shared_reranker = Reranker()
+    return _shared_reranker
