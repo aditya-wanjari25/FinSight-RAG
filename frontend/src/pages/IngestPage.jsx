@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { uploadPdf } from '../api'
 import IngestForm from '../components/IngestForm'
 import IngestResultCard from '../components/IngestResultCard'
+import { UploadIcon } from '../components/icons'
 
-function IngestPage() {
-  // The file itself lives in its own piece of state, separate from the
-  // text fields — it's a different *kind* of value (a File object, not a
-  // string) and it's set from event.target.files instead of .value.
+function IngestPage({ onIngested }) {
   const [file, setFile] = useState(null)
 
   const [fields, setFields] = useState({
@@ -25,9 +23,6 @@ function IngestPage() {
   }
 
   function handleFileChange(event) {
-    // event.target.files is a FileList (even for a single-file input) —
-    // grab the first entry. It'll be undefined if the user cancels the
-    // file picker without choosing anything.
     setFile(event.target.files[0] ?? null)
   }
 
@@ -42,6 +37,12 @@ function IngestPage() {
     try {
       const data = await uploadPdf({ file, ...fields })
       setResult(data)
+
+      // Tell App this is now the "active document" — the backend's ticker
+      // is the sanitized version (uppercased, stripped of anything that
+      // isn't alphanumeric — see api/routes/ingest.py), so we use that
+      // instead of echoing back whatever the user typed in `fields`.
+      onIngested?.({ ticker: data.ticker, year: data.year, quarter: fields.quarter })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -51,6 +52,17 @@ function IngestPage() {
 
   return (
     <>
+      <header className="mb-6">
+        <div className="flex items-center gap-2 text-indigo-600 mb-1">
+          <UploadIcon className="w-5 h-5" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Ingestion</span>
+        </div>
+        <h1 className="text-2xl font-semibold text-slate-900">Upload a filing</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Parse, chunk, embed, and store a 10-K or 10-Q so you can ask questions about it.
+        </p>
+      </header>
+
       <IngestForm
         fields={fields}
         file={file}
@@ -61,7 +73,7 @@ function IngestPage() {
       />
 
       {error && (
-        <p className="mt-4 text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+        <p className="mt-4 text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
           {error}
         </p>
       )}

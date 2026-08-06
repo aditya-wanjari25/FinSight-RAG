@@ -1,7 +1,7 @@
 // Talks to the FastAPI backend. Kept separate from App.jsx so the component
 // only worries about rendering — not about URLs, headers, or JSON parsing.
 
-export async function askQuery({ query, ticker, year, quarter }) {
+export async function askQuery({ query, ticker, year, quarter, sessionId }) {
   const response = await fetch('/api/query', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -10,6 +10,12 @@ export async function askQuery({ query, ticker, year, quarter }) {
       ticker,
       year: Number(year), // the <input type="number"> still gives us a string
       quarter,
+      // If sessionId is undefined (no session yet), JSON.stringify drops
+      // this key from the body entirely; if it's null, the key is kept
+      // with a JSON null value. Either way, the backend's
+      // `session_id: Optional[str] = Field(default=None)` treats a
+      // missing key and an explicit null identically — both become None.
+      session_id: sessionId,
     }),
   })
 

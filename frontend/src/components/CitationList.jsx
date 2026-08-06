@@ -6,15 +6,17 @@ function CitationList({ citations }) {
 
   return (
     <div>
-      <h3 className="text-sm font-medium text-slate-700 mb-2">Sources</h3>
-      <ul className="space-y-1">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+        Sources
+      </h3>
+      <ul className="space-y-1.5">
         {citations.map((citation, index) => (
           <li
             key={`${citation.section}-${citation.page}-${index}`}
-            className="text-sm text-slate-600 border-l-2 border-slate-300 pl-3"
+            className="text-sm text-slate-600 border-l-2 border-indigo-200 pl-3 py-0.5"
           >
-            {citation.ticker} {citation.year} — {citation.section}, page{' '}
-            {citation.page}
+            <span className="font-medium text-slate-700">{citation.ticker}</span>{' '}
+            {citation.year} — {citation.section}, page {citation.page}
           </li>
         ))}
       </ul>

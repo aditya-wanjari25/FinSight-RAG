@@ -1,53 +1,63 @@
 import { useState } from 'react'
+import Sidebar from './components/Sidebar'
 import QueryPage from './pages/QueryPage'
 import IngestPage from './pages/IngestPage'
 
-// A tiny plain-JS array describing our two tabs. We render this list with
-// .map() below, same idea as citations — it means adding a third tab later
-// is a one-line change here instead of copy-pasting a <button>.
-const TABS = [
-  { id: 'query', label: 'Ask a question' },
+const ACTIVE_DOC_KEY = 'finsight_active_document'
+const DEFAULT_DOCUMENT = { ticker: '', year: '', quarter: 'annual' }
+
+// Nav order matches what was asked for: Upload first, then Ask. This list
+// drives both the sidebar (Sidebar.jsx) and which page renders below —
+// one source of truth instead of two places that could drift out of sync.
+const NAV_ITEMS = [
   { id: 'ingest', label: 'Upload a filing' },
+  { id: 'query', label: 'Ask a question' },
 ]
 
-// This is "client-side routing" in its most minimal form: no URL changes,
-// no back-button support, no react-router — just a piece of state that
-// says which page is active, and an if/else (here, a lookup object) that
-// picks which component to render. Real apps eventually reach for a
-// router library once they need shareable URLs per page, but the
-// underlying idea — state decides what's on screen — is identical.
 function App() {
-  const [activeTab, setActiveTab] = useState('query')
+  const [activeTab, setActiveTab] = useState('ingest')
+
+  // "Active document" = whichever ticker/year/quarter the user is
+  // currently working with. It's owned here, in the nearest common
+  // ancestor of IngestPage and QueryPage, because both need to read AND
+  // write it: ingesting a filing sets it, asking a question also updates
+  // it (if the user changes ticker), and both pages need to read the
+  // current value. This is the same "lift state up" pattern as the query
+  // form fields — just one level higher, since now two whole pages share it.
+  const [activeDocument, setActiveDocumentState] = useState(() => {
+    const stored = sessionStorage.getItem(ACTIVE_DOC_KEY)
+    return stored ? JSON.parse(stored) : DEFAULT_DOCUMENT
+  })
+
+  function setActiveDocument(doc) {
+    setActiveDocumentState(doc)
+    sessionStorage.setItem(ACTIVE_DOC_KEY, JSON.stringify(doc))
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex justify-center py-12 px-4">
-      <div className="w-full max-w-2xl">
-        <h1 className="text-3xl font-semibold text-slate-900 mb-1">
-          FinSight RAG
-        </h1>
-        <p className="text-sm text-slate-500 mb-6">
-          Ask a question about an ingested 10-K / 10-Q filing, or upload a new one.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+      <Sidebar
+        items={NAV_ITEMS}
+        activeTab={activeTab}
+        onSelect={setActiveTab}
+        activeDocument={activeDocument}
+      />
 
-        <div className="flex gap-2 mb-4 border-b border-slate-200">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
-                activeTab === tab.id
-                  ? 'border-slate-900 text-slate-900'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+      <main className="flex-1 min-w-0">
+        <div className="max-w-3xl mx-auto px-6 py-10 md:px-10">
+          {activeTab === 'ingest' ? (
+            <IngestPage
+              activeDocument={activeDocument}
+              onIngested={setActiveDocument}
+            />
+          ) : (
+            <QueryPage
+              activeDocument={activeDocument}
+              onDocumentChange={setActiveDocument}
+            />
+          )}
         </div>
-
-        {activeTab === 'query' ? <QueryPage /> : <IngestPage />}
-      </div>
+      </main>
     </div>
   )
 }
