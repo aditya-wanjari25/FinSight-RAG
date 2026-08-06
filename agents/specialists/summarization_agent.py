@@ -64,6 +64,7 @@ class SummarizationAgent:
                     quarter=state["quarter"],
                     context=format_chunks(chunks),
                     tool_results=summary_result.get("summary_prompt", "None"),
+                    conversation_history=state.get("conversation_history", ""),
                 )},
             ],
             temperature=0.1,

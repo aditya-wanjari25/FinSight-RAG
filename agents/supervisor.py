@@ -71,6 +71,8 @@ def classify(state: SupervisorState) -> dict:
         query=state["query"],
         ticker=state["ticker"],
         year=state["year"],
+        conversation_history=state.get("conversation_history") or
+            "(No previous questions in this session — this is the first turn.)",
     )
 
     try:

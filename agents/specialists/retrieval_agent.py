@@ -48,6 +48,7 @@ class RetrievalAgent:
                     quarter=state["quarter"],
                     context=format_chunks(chunks),
                     tool_results="None",
+                    conversation_history=state.get("conversation_history", ""),
                 )},
             ],
             temperature=0.1,

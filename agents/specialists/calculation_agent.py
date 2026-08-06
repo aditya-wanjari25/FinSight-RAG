@@ -78,6 +78,7 @@ class CalculationAgent:
                     quarter=state["quarter"],
                     context=format_chunks(chunks),
                     tool_results=calc_result.get("extraction_prompt", "None"),
+                    conversation_history=state.get("conversation_history", ""),
                 )},
             ],
             temperature=0.1,

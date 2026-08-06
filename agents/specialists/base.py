@@ -59,6 +59,7 @@ def specialist_input(supervisor_state: dict, **overrides) -> dict:
         "section_filter": supervisor_state.get("section_filter"),
         "comparison_year": supervisor_state.get("comparison_year"),
         "comparison_ticker": supervisor_state.get("comparison_ticker"),
+        "conversation_history": supervisor_state.get("conversation_history", ""),
         "retrieved_chunks": None,
         "tool_results": None,
         "final_answer": None,

@@ -90,6 +90,7 @@ class SpecialistState(TypedDict):
     final_answer: Optional[str]
     citations: Optional[list[Citation]]
     error: Optional[str]
+    conversation_history: Optional[str]  # prior turns in this session, pre-formatted as text
 
 
 class SupervisorState(TypedDict):
@@ -116,3 +117,6 @@ class SupervisorState(TypedDict):
     error: Optional[str]
     # Guardrail (set by guardrail node)
     is_out_of_scope: Optional[bool]
+    # Memory (set by caller from ConversationMemory before the graph runs —
+    # not written to by any node; it's a read-only input, same as query/ticker)
+    conversation_history: Optional[str]

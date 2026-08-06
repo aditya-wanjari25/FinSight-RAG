@@ -63,6 +63,7 @@ class ComparisonAgent:
                     comparison_year=data["year_comparison"],
                     context_current=_format_period_chunks(data["current"]),
                     context_comparison=_format_period_chunks(data.get("comparison", [])),
+                    conversation_history=state.get("conversation_history", ""),
                 )},
             ],
             temperature=0.1,

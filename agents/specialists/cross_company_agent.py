@@ -81,6 +81,7 @@ class CrossCompanyAgent:
                     year=state["year"],
                     context_ticker1=_format_company_chunks(cross_data["chunks_ticker1"]),
                     context_ticker2=_format_company_chunks(cross_data["chunks_ticker2"]),
+                    conversation_history=state.get("conversation_history", ""),
                 )},
             ],
             temperature=0.1,
